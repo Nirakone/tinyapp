@@ -69,3 +69,16 @@ app.get("/u/:id", (req, res) => {
     res.status(404).send("URL not found");
   }
 });
+
+app.post("/urls/:id/delete", (req, res) => {
+  const urlID = req.params.id;
+  delete urlDatabase[urlID];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:id", (req, res) => {
+  const urlID = req.params.id;
+  const newURL = req.body.longURL;
+  urlDatabase[urlID] = newURL;
+  res.redirect("/urls");
+});
