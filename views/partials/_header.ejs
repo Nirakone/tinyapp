@@ -20,11 +20,17 @@
           
     </div>
     <div style="text-align: right;">  
-      <p> <%= username %> is logged in</p>         
+      <% if(username) { %>
+      <p> <%= username %> is logged in</p>
+      <form action="/logout"   method="POST" >
+        <button  type="submit"> Logout </button> 
+      </form>
+      <% } else { %>         
       <form method="POST" action="/login">        
         <input type="text" id="username" name="username" placeholder="Username">        
         <button type="submit" class="btn btn-primary">Log In</button>
       </form>
       </div>
+      <% } %>
   </nav>
 </header>
