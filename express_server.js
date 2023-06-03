@@ -105,3 +105,8 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("username", [null]);
+  res.redirect("/urls");
+});
