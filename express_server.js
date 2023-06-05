@@ -62,16 +62,22 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  
-  const templateVars = {
-    user: req.cookies["user_id"],
-    
-  };
-  res.render("urls_new", templateVars);
+  if (!req.cookies.user_id) {
+    res.redirect("/login");
+  } else {
+    const templateVars = {
+      user: users[req.cookies.user_id],
+    };
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/register",(req,res)=> {
-  res.render("urls_register");
+  if (req.cookies.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.render("urls_register");
+  }
 });
   
 app.post("/register",(req,res) => {
@@ -102,11 +108,15 @@ app.post("/register",(req,res) => {
 
 
 app.get("/login", (req,res) => {
-  const templateVars = {
-    user: req.cookies["user_id"],
-    urls: urlDatabase,
-  };
-  res.render("urls_login", templateVars);
+  if (req.cookies.user_id) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = {
+      user: req.cookies.user_id,
+      urls: urlDatabase,
+    };
+   res.render("urls_login", templateVars);
+}
 });
 
 app.post("/login",(req,res) => {
@@ -155,12 +165,20 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  //res.send("Ok"); // Respond with 'Ok' (we will replace this)
-  const newId = generateRandomString();
-  urlDatabase[newId] = req.body.longURL;
-  res.redirect(`/urls/${newId}`);
+  // console.log(req.body); // Log the POST request body to the console
+  // //res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  // const newId = generateRandomString();
+  // urlDatabase[newId] = req.body.longURL;
+  // res.redirect(`/urls/${newId}`);
+  if (!req.cookies.user_id) {
+    res.status(401).send("You must be logged in to shorten URLs.");
+  } else {
+    const newId = generateRandomString();
+    urlDatabase[newId] = req.body.longURL;
+    res.redirect(`/urls/${newId}`);
+  }
 });
+
 
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
