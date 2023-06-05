@@ -99,25 +99,7 @@ app.post("/register",(req,res) => {
   res.redirect("/urls");
 });
 
-const userExists = (email) => {
-  for (const userID in users) {
-    const user = users[userID];
-    if (user.email === email) {
-      return user;
-    }
-  }
-  return null;
-};
 
-const findPassword = (password) => {
-  for (const userID in users) {
-    const user = users[userID];
-    if(user.password === password) {
-      return user;
-    }
-  }
-  return null;
-};
 
 app.get("/login", (req,res) => {
   const templateVars = {
@@ -129,6 +111,27 @@ app.get("/login", (req,res) => {
 
 app.post("/login",(req,res) => {
   const {email, password} = req.body;
+
+  const userExists = (email) => {
+    for (const userID in users) {
+      const user = users[userID];
+      if (user.email === email) {
+        return user;
+      }
+    }
+    return null;
+  };
+  
+  const findPassword = (password) => {
+    for (const userID in users) {
+      const user = users[userID];
+      if(user.password === password) {
+        return user;
+      }
+    }
+    return null;
+  };
+
   if (!email || !password) {
     return res.status(400).send('Invalid');
 
@@ -181,11 +184,11 @@ app.post("/urls/:id", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/login",(req,res) => {
-  console.log(req.body);
-  //res.cookie("username",req.body.username);
-  res.redirect("/urls");
-});
+// app.post("/login",(req,res) => {
+//   console.log(req.body);
+//   //res.cookie("username",req.body.username);
+//   res.redirect("/urls");
+// });
 
 app.get("/urls", (req, res) => {
   const templateVars = {
