@@ -40,6 +40,7 @@ const users = {
   },
 };
 
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -69,7 +70,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-
 app.get("/register",(req,res)=> {
   res.render("urls_register");
 });
@@ -78,20 +78,72 @@ app.post("/register",(req,res) => {
 
   const userID = generateRandomString(10);
   const { email, password } = req.body;
-  
-  const newUser = {
+    users[userID] = {
     id: userID,
     email: email,
     password: password
   };
   
-  users[userID] = newUser;
-  
   res.cookie("user_id", userID);
   
+  if (!email || !password) {
+    res.status(400).send("Email or password cannot be empty.");
+    return;
+  }
+
+  const alreadyUser = Object.values(users).find(user => user.email === email);
+  if (alreadyUser) {
+    res.status(400).send("Email is already registered.");
+    return;
+  }
   res.redirect("/urls");
 });
-  
+
+const userExists = (email) => {
+  for (const userID in users) {
+    const user = users[userID];
+    if (user.email === email) {
+      return user;
+    }
+  }
+  return null;
+};
+
+const findPassword = (password) => {
+  for (const userID in users) {
+    const user = users[userID];
+    if(user.password === password) {
+      return user;
+    }
+  }
+  return null;
+};
+
+app.get("/login", (req,res) => {
+  const templateVars = {
+    user: req.cookies["user_id"],
+    urls: urlDatabase,
+  };
+  res.render("urls_login", templateVars);
+});
+
+app.post("/login",(req,res) => {
+  const {email, password} = req.body;
+  if (!email || !password) {
+    return res.status(400).send('Invalid');
+
+  } else if (!userExists(email)) {
+    return res.status(403).send("User does not exist.");
+
+  } else if (!findPassword(password)) {
+    return res.status(403).send("Incorrect password");
+  }
+
+  const user = userExists(email);
+  res.cookie("url_id",user.id);
+  res.redirect("/urls");
+});
+
 
 
 app.get("/urls/:id", (req, res) => {
