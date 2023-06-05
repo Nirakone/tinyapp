@@ -18,9 +18,20 @@ function generateRandomString() {
   return randomString;
 }
 
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
+
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 // app.get("/", (req, res) => {
@@ -58,6 +69,9 @@ app.get("/hello", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase, user: req.cookies.user_id };
+  if (!templateVars.user) {
+    return res.status(403).send(`Status code: ${res.statusCode} - ${res.statusMessage}. To see urls, log in or register.`);
+  }
   res.render("urls_index", templateVars);
 });
 
@@ -160,7 +174,14 @@ app.post("/login",(req,res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id]["longUrl"] };
+  if (!req.cookies["user_id"]) {
+    return res.status(403).send(`Status code: ${res.statusCode} - ${res.statusMessage} Log in or register.`);
+  }
+  const id = req.params.id;
+  if (!urlDatabase[id]) {
+    return res.status(403).send("Non existent");
+  }
   res.render("urls_show", templateVars);
 });
 
@@ -181,9 +202,9 @@ app.post("/urls", (req, res) => {
 
 
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id];
-  if (longURL) {
-    res.redirect(longURL);
+  const loadLongURL = urlDatabase[req.params.id]["longUrl"];
+  if (loadLongURL) {
+    res.redirect(loadLongURL);
   } else {
     res.status(404).send("URL not found");
   }
@@ -191,8 +212,19 @@ app.get("/u/:id", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   const urlID = req.params.id;
-  delete urlDatabase[urlID];
+  const user = req.cookies.user_id;
+
+  if (!user) {
+    res.status(403).send(`Status code: ${res.statusCode} - ${res.statusMessage}. Denied. Log in or register`);
+  } else if (!urlDatabase[urlID]) {
+    res.status(404).send(`Status code: ${res.statusCode} - ${res.statusMessage}. Non existent`);
+  } else if (urlDatabase[urlID]["userID"] !== user["id"]) {
+    res.status(403).send(`Status code: ${res.statusCode} - ${res.statusMessage}. Not permitted`);
+  } else {
+    delete urlDatabase[urlID];
+
   res.redirect("/urls");
+  }
 });
 
 app.post("/urls/:id", (req, res) => {
