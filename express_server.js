@@ -51,6 +51,16 @@ const users = {
   },
 };
 
+function urlsForUser(id) {
+  const userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
+};
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -68,11 +78,23 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, user: req.cookies.user_id };
-  if (!templateVars.user) {
-    return res.status(403).send(`Status code: ${res.statusCode} - ${res.statusMessage}. To see urls, log in or register.`);
+  // const templateVars = { urls: urlDatabase, user: req.cookies.user_id };
+  // if (!templateVars.user) {
+  //   return res.status(403).send(`Status code: ${res.statusCode} - ${res.statusMessage}. To see urls, log in or register.`);
+  // }
+  // res.render("urls_index", templateVars);
+
+  const userId = req.cookies.user_id;
+  if (!userId) {
+    return res.status(403).send("Please log in or register.");
   }
+  const userURLs = urlsForUser(userId);
+  const templateVars = {
+    urls: userURLs,
+    user: users[userId]
+  };
   res.render("urls_index", templateVars);
+
 });
 
 app.get("/urls/new", (req, res) => {
@@ -170,7 +192,6 @@ app.post("/login",(req,res) => {
   res.cookie("url_id",user.id);
   res.redirect("/urls");
 });
-
 
 
 app.get("/urls/:id", (req, res) => {
