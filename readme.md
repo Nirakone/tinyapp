@@ -12,6 +12,12 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - bcryptjs
 - cookie-session
 
+## Screenshots of app
+
+!["Screenshot of created URLs"](tinyapp1.jpg)
+!["Screenshot of create URL page"](tinyapp2.jpg)
+
+
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
